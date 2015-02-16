@@ -59,6 +59,7 @@ int f_jobs_load(const char *file, char comment_separator, char job_separator) {
 			if ((fgets(buffer, d_string_buffer_size, stream)) > 0) {
 				if ((pointer = strchr(buffer, comment_separator)))
 					*pointer = '\0';
+				f_string_trim(buffer);
 				if (f_string_strlen(buffer) > 0)
 					if ((entry) || (entry = (struct s_jobs_entry *) d_malloc(sizeof(struct s_jobs_entry)))) {
 						if (p_jobs_load_job(buffer, job_separator, entry)) {
