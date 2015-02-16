@@ -94,7 +94,7 @@ int p_jobs_run_execute(const char *command) {
 
 int f_jobs_run(void) {
 	struct s_jobs_entry *current_entry;
-	time_t local_timestamp = time(NULL);
+	time_t local_timestamp = time(NULL), starting, elapsed;
 	struct tm *timestamp = localtime(&local_timestamp);
 	int execute, ignorable, index, result = d_false, *timestamp_entries[] = {
 		&(timestamp->tm_min),
@@ -122,10 +122,16 @@ int f_jobs_run(void) {
 					}
 				}
 				if (execute) {
-					d_log(e_log_level_ever, "[execution] - {%d:%d %d/%d/%d} running '%s'", timestamp->tm_hour,
-							timestamp->tm_min, timestamp->tm_mday, timestamp->tm_mon, timestamp->tm_year, current_entry->action);
-					if (!p_jobs_run_execute(current_entry->action))
+					d_log(e_log_level_ever, "[execution] - {%d:%02d %02d/%02d/%04d} running '%s' ... ", timestamp->tm_hour,
+							timestamp->tm_min, timestamp->tm_mday, timestamp->tm_mon, (timestamp->tm_year+1900),
+							current_entry->action);
+					starting = time(NULL);
+					if (p_jobs_run_execute(current_entry->action)) {
+						elapsed = time(NULL)-starting;
+						d_log(e_log_level_ever, "[execution] \t... which required %zu seconds", elapsed);
+					} else
 						d_log(e_log_level_medium, "[execution] - p_job_run_execute(\"%s\") returns error", current_entry->action);
+
 				}
 			}
 		}
