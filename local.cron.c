@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <signal.h>
 #include "jobs.h"
 #define d_local_cron_comment_separator '#'
 #define d_local_cron_job_separator ' '
