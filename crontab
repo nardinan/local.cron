@@ -1,0 +1,7 @@
+# local.crontab
+# -------------
+# format:
+# mm hh dd MM yyyy <job>
+* * * * * /bin/ls -lash &>/dev/null # every minute 
+28 * * * * /bin/sleep 2 && echo 'complete' # every hour
+# and so on, so on ...
