@@ -148,5 +148,6 @@ void f_jobs_destroy(void) {
 			d_free(current);
 		}
 		f_list_destroy(&v_jobs);
+		v_jobs = NULL;
 	}
 }
