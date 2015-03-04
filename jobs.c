@@ -94,15 +94,22 @@ int p_jobs_run_execute(const char *command) {
 
 int f_jobs_run(void) {
 	struct s_jobs_entry *current_entry;
-	time_t local_timestamp = time(NULL), starting, elapsed;
+	time_t local_timestamp = time(NULL), starting;
 	struct tm *timestamp = localtime(&local_timestamp);
-	int execute, ignorable, index, result = d_false, *timestamp_entries[] = {
+	int execute, ignorable, index, time_index, result = d_false, *timestamp_entries[] = {
 		&(timestamp->tm_min),
 		&(timestamp->tm_hour),
 		&(timestamp->tm_mday),
 		&(timestamp->tm_mon),
 		&(timestamp->tm_year)
 	};
+	char *time_unit[] = {
+		"seconds",
+		"minutes",
+		"hours",
+		NULL
+	};
+	float elapsed;
 	if (v_jobs) {
 		d_foreach(v_jobs, current_entry, struct s_jobs_entry) {
 			execute = d_true;
@@ -128,7 +135,12 @@ int f_jobs_run(void) {
 					starting = time(NULL);
 					if (p_jobs_run_execute(current_entry->action)) {
 						elapsed = time(NULL)-starting;
-						d_log(e_log_level_ever, "[execution] \t... which required %zu seconds", elapsed);
+						time_index = 0;
+						while ((time_unit[time_index+1]) && (elapsed > 60.0)) {
+							time_index++;
+							elapsed /= 60.0;
+						}
+						d_log(e_log_level_ever, "[execution] \t... which required %.02f %s", elapsed, time_unit[time_index]);
 					} else
 						d_log(e_log_level_medium, "[execution] - p_job_run_execute(\"%s\") returns error", current_entry->action);
 
