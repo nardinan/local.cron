@@ -1,0 +1,11 @@
+language: c
+
+compiler:
+        - gcc
+
+before_script:
+        - git clone git://github.com/nardinan/miranda
+        - cd miranda && make && sudo make install
+
+script:
+        - make
