@@ -2,7 +2,7 @@ objects = jobs.o local.cron.o
 cc = gcc -g
 cflags = -Wall -I.. -Wno-variadic-macros -Wno-missing-braces -Wno-pointer-sign -c
 lflags = -Wall
-liblink = -L../miranda -L/usr/lib -lpthread -lmiranda_ground `mysql_config --libs`
+liblink = -L/usr/lib -lpthread -lmiranda_ground
 exec = local.cron.bin
 
 all: $(objects)
