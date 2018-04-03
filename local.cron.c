@@ -45,7 +45,6 @@ int f_local_cron_analyze_file(char *file) {
 int main (int argc, char *argv[]) {
 	char *current_crontab = d_local_cron_crontab;
 	v_log_level = e_log_level_ever;
-	f_memory_init();
 	if (argc >= 2)
 		current_crontab = argv[1];
 	if (f_jobs_load(current_crontab, d_local_cron_comment_separator, d_local_cron_job_separator)) {
