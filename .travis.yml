@@ -1,11 +1,11 @@
 language: c
 
 compiler:
-        - gcc
+    - gcc
 
 install:
-        - git clone -b release_0.1 git://github.com/nardinan/miranda
-        - echo $(cd miranda && make && sudo make install)
+    - git clone -b release_0.1 git://github.com/nardinan/miranda
+    - echo $(cd miranda && mkdir build && cd build && cmake .. && make && sudo make install)
 
 script:
-        - make
+    - make
