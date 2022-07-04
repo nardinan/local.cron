@@ -19,24 +19,27 @@
 #define local_cron_jobs_h
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
+#include <syslog.h>
 #include <time.h>
-#include <miranda/ground.h>
+#define d_string_buffer_size 4096
 #define d_jobs_stream_null -1
 typedef enum e_jobs_timestamp {
-	e_jobs_timestamp_minute = 0,
-	e_jobs_timestamp_hour,
-	e_jobs_timestamp_day,
-	e_jobs_timestamp_month,
-	e_jobs_timestamp_year,
-	e_jobs_timestamp_null
+  e_jobs_timestamp_minute = 0,
+  e_jobs_timestamp_hour,
+  e_jobs_timestamp_day,
+  e_jobs_timestamp_month,
+  e_jobs_timestamp_year,
+  e_jobs_timestamp_null
 } e_jobs_timestamp;
-typedef struct s_jobs_entry { d_list_node_head;
-	char action[d_string_buffer_size];
-	int timestamp[e_jobs_timestamp_null], last_timestamp[e_jobs_timestamp_null];
+typedef struct s_jobs_entry {
+  struct s_jobs_entry *next, *previous;
+  char *action;
+  int timestamp[e_jobs_timestamp_null], last_timestamp[e_jobs_timestamp_null];
 } s_jobs_entry;
-extern struct s_list *v_jobs;
-extern int p_jobs_load_job(char *string, char separator, struct s_jobs_entry *entry);
+extern s_jobs_entry *v_jobs;
+extern bool p_jobs_load_job(char *string, char separator, s_jobs_entry *entry);
 extern int f_jobs_load(const char *file, char comment_separator, char job_separator);
 extern int p_jobs_run_execute(const char *buffer);
 extern int f_jobs_run(void);
