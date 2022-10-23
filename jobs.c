@@ -116,55 +116,40 @@ int f_jobs_run(void) {
   struct s_jobs_entry *current_entry;
   time_t local_timestamp = time(NULL), starting;
   struct tm *timestamp = localtime(&local_timestamp);
-  int execute, ignorable, index, time_index, result = false, *timestamp_entries[] = {
+  int jolly_marker_different, defined_markers_matching, index, result = false, *timestamp_entries[] = {
     &(timestamp->tm_min),
     &(timestamp->tm_hour),
     &(timestamp->tm_mday),
     &(timestamp->tm_mon),
     &(timestamp->tm_year)
   };
-  char *time_unit[] = {
-    "seconds",
-    "minutes",
-    "hours",
-    NULL
-  };
-  float elapsed;
   if (v_jobs) {
     current_entry = v_jobs;
     while (current_entry) {
-      execute = true;
-      for (index = 0; index < e_jobs_timestamp_null; ++index)
-        if ((current_entry->timestamp[index] > -1) && (current_entry->timestamp[index] != *(timestamp_entries[index])))
-          execute = false;
-      if (execute) {
-        for (index = (e_jobs_timestamp_null-1), ignorable = false, execute = false; index >= 0; --index) {
-          if ((current_entry->timestamp[index] == -1) && (!ignorable)) {
-            if (*(timestamp_entries[index]) != current_entry->last_timestamp[index]) {
-              execute = true;
-              current_entry->last_timestamp[index] = *(timestamp_entries[index]);
-            }
-          } else {
-            ignorable = true;
-            current_entry->last_timestamp[index] = -1;
-          }
-        }
-        if (execute) {
-          syslog(LOG_INFO, "[execution] - {%d:%02d %02d/%02d/%04d} running '%s' ... ", timestamp->tm_hour,
-              timestamp->tm_min, timestamp->tm_mday, timestamp->tm_mon, (timestamp->tm_year+1900),
-              current_entry->action);
-          starting = time(NULL);
-          if (p_jobs_run_execute(current_entry->action)) {
-            elapsed = time(NULL)-starting;
-            time_index = 0;
-            while ((time_unit[time_index+1]) && (elapsed > 60.0)) {
-              time_index++;
-              elapsed /= 60.0;
-            }
-            syslog(LOG_INFO, "[execution] \t... which required %.02f %s", elapsed, time_unit[time_index]);
-          } else
-            syslog(LOG_WARNING, "[execution] - p_job_run_execute(\"%s\") returns error", current_entry->action);
-        }
+      defined_markers_matching = true;
+      jolly_marker_different = false;
+      /* to know if an entry has to be launched we need the following two conditions to be true:
+       * - every defined marker (different from -1) has to match with the current timestamp
+       * - at least one of the last_timestamp values of the jolly markers (the onest set to -1) is different from the current timestamp
+       */
+      for (index = 0; (index < e_jobs_timestamp_null) && (defined_markers_matching); ++index) {
+        if (current_entry->timestamp[index] == -1) {
+          if (current_entry->last_timestamp[index] != *(timestamp_entries[index]))
+            jolly_marker_different = true;
+        } else if (current_entry->timestamp[index] != *(timestamp_entries[index]))
+          defined_markers_matching = false;
+      }
+      if ((defined_markers_matching) && (jolly_marker_different)) {
+        for (index = 0; index < e_jobs_timestamp_null; ++index)
+          current_entry->last_timestamp[index] = *(timestamp_entries[index]);
+        syslog(LOG_INFO, "[execution] - {%d:%02d %02d/%02d/%04d} running '%s' ... ", timestamp->tm_hour,
+            timestamp->tm_min, timestamp->tm_mday, timestamp->tm_mon, (timestamp->tm_year+1900),
+            current_entry->action);
+        starting = time(NULL);
+        if (p_jobs_run_execute(current_entry->action))
+          syslog(LOG_INFO, "[execution] \t... which required %zu seconds", (time(NULL) - starting));
+        else
+          syslog(LOG_WARNING, "[execution] - p_job_run_execute(\"%s\") returns error", current_entry->action);
       }
       current_entry = current_entry->next;
     }
